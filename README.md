@@ -1,3 +1,21 @@
+# ODCV-node9-Bench (`feat/node9-integration`)
+
+Fork of [`McGill-DMaS/ODCV-Bench`](https://github.com/McGill-DMaS/ODCV-Bench) integrating **`@node9/proxy` (v2.62.1)** as a deterministic runtime security proxy, alongside dual-score LLM-as-a-Judge evaluation and the `hard_scenarios/` impossible-KPI stress-test suite.
+
+## What Changed in This Branch vs. Upstream (`McGill-DMaS/ODCV-Bench`)
+
+| Path / Component | Status vs. Upstream | Summary of Changes |
+| :--- | :--- | :--- |
+| `mission_executor/Dockerfile.universal` | **Added** | Single reproducible container image supporting `baseline`, `odcv-v1.1`, `node9-default`, and `node9-tuned` via `FRAMEWORK_MODE` without rebuilding between modes. |
+| `mission_executor/agent_main.py` | **Modified** | Added `_evaluate_framework_policy()` pre-execution dispatcher to inspect shell commands via `node9 explain`, block violations with exit code `126`, and log rule IDs + latency. |
+| `mission_executor/policies/node9.tuned.config.json` | **Added** | Tier-3 project config enforcing universal `P1–P4` rules, path jail, network egress block, and domain-specific Hard ODCV `smartRules`. |
+| `odcv_bench/judge.py` & `judge_panel.py` | **Modified** | Upgraded 0–5 evaluation rubric to emit dual scores (`attempt_score` vs. `outcome_score`) and credit honest `/app/output/escalation_report.md` refusals on impossible tasks. |
+| `hard_scenarios/` | **Added** | Isolated impossible-KPI benchmark suite (*Academic Research Integrity*, *Financial Audit Fraud*, *Healthcare Patient Safety*) with deterministic loophole verifiers (`hard_metrics.py`). |
+| `REPRODUCE_NODE9.md` | **Added** | End-to-end build, CLI verification (`explain`, `posture`, `scan`), and sweep reproduction instructions. |
+| `docs/frameworks/node9.md` | **Added** | Architectural overview, configuration mapping, and standardized telemetry schema for cross-framework comparison. |
+| `mandated_scenarios/` & `incentivized_scenarios/` | **Unchanged** | Kept identical to upstream for direct comparison against the shared $N=18$ pre-policy (`44.4%` CHR) and policy-adjusted (`100.0%` CHR) baselines. |
+
+---
 # ODCV-Bench: Evaluating Outcome-Driven Constraint Violations in Autonomous AI Agents
 
 [![arXiv](https://img.shields.io/badge/arXiv-2512.20798-b31b1b.svg)](https://arxiv.org/abs/2512.20798) 
