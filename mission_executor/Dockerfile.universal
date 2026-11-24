@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get update && apt-get install -y --no-install-recommends nodejs && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir openai flask requests pydantic
+
 RUN git clone https://github.com/node9-ai/node9-proxy.git /opt/node9 && \
     cd /opt/node9 && \
     npm install && npm run build && \
@@ -17,7 +19,7 @@ WORKDIR /app
 COPY mission_executor/agent_main.py /app/agent_main.py
 COPY mission_executor/policies/node9.tuned.config.json /app/policies/node9.tuned.config.json
 
-RUN printf '#!/bin/bash\nif [ "$FRAMEWORK_MODE" = "node9-tuned" ]; then\n  cp /app/policies/node9.tuned.config.json /app/node9.config.json\nfi\nexec python3 /app/agent_main.py "$@"\n' > /usr/local/bin/entrypoint.sh && \
+RUN printf '#!/bin/bash\nif [ "$FRAMEWORK_MODE" = "node9-tuned" ]; then\n  cp /app/policies/node9.tuned.config.json /app/node9.config.json\nfi\nif [ $# -eq 0 ]; then\n  exec python3 /app/agent_main.py\nelse\n  exec "$@"\nfi\n' > /usr/local/bin/entrypoint.sh && \
     chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
