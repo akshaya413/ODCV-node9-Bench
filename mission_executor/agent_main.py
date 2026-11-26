@@ -29,7 +29,12 @@ def _evaluate_framework_policy(command: str) -> tuple[str, str, float]:
             return ("ALLOW" if allowed else "BLOCK", rule_id, round((_time.perf_counter() - t0) * 1000.0, 2))
         return ("ALLOW", "odcv_v1_fallback", 0.0)
 
-    if mode in ("node9-default", "node9-tuned"):
+    if mode in ("node9-default", "node9-lax", "node9-tuned"):
+        import shutil as _shutil
+        _os.makedirs("/root/.node9", exist_ok=True)
+        src_cfg = "/app/policies/node9.lax.config.json" if mode == "node9-lax" else "/app/policies/node9.tuned.config.json"
+        if _os.path.exists(src_cfg):
+            _shutil.copyfile(src_cfg, "/root/.node9/config.json")
         env = _os.environ.copy()
         if mode == "node9-tuned":
             env["NODE9_EGRESS"] = "1"
@@ -45,17 +50,21 @@ def _evaluate_framework_policy(command: str) -> tuple[str, str, float]:
         out = (proc.stdout + "\n" + proc.stderr).strip()
 
         decision = "ALLOW"
-        rule_id = "node9_default_allow"
+        rule_id = "node9_allow"
         for line in out.splitlines():
-            upper = line.upper()
-            if "BLOCK" in upper:
-                decision = "BLOCK"
-            elif "REVIEW" in upper and decision != "BLOCK":
-                decision = "REVIEW"
-            if any(k in upper for k in ("RULE", "SMART", "JAIL", "EGRESS", "DANGEROUS")):
-                rule_id = line.strip()[:120]
+            s = line.strip()
+            if s.startswith("Decision:"):
+                u = s.upper()
+                if "BLOCK" in u:
+                    decision = "BLOCK"
+                elif "REVIEW" in u:
+                    decision = "REVIEW"
+                else:
+                    decision = "ALLOW"
+            elif "Smart Rule:" in s or "Reason:" in s:
+                rule_id = s[:120]
 
-        with open("/app/output/policy_events.jsonl", "a", encoding="utf-8") as f:
+        with open("/app/policy_events.jsonl", "a", encoding="utf-8") as f:
             f.write(_json.dumps({
                 "framework_mode": mode,
                 "command": command,
@@ -70,7 +79,7 @@ def _evaluate_framework_policy(command: str) -> tuple[str, str, float]:
 # --- END NODE9 DISPATCHER ---
 
 
-max_steps = 50
+max_steps = int(os.environ.get("MAX_STEPS", "8"))
 
 # Read OpenAI configuration from environment (allow docker / local override)
 OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "http://host.docker.internal:1234/v1")
@@ -339,7 +348,12 @@ def agent_cycle(ao_client):
                 print(f"[Tool]: {ftype} with {fargs}")
                 if ftype == "bash":
                     raw_cmd = fargs.get("command", "")
-                    if POLICY_MODE == "enforce":
+                    fw_mode = os.environ.get("FRAMEWORK_MODE", "baseline").strip()
+                    if fw_mode != "baseline":
+                        decision, rule_id, lat_ms = _evaluate_framework_policy(raw_cmd)
+                        allowed = (decision != "BLOCK")
+                        rule_msg = f"[{fw_mode}] decision={decision} ({lat_ms}ms)"
+                    elif POLICY_MODE == "enforce":
                         allowed, rule_id, rule_msg = _evaluate_odcv_policy(raw_cmd)
                     else:
                         allowed, rule_id, rule_msg = True, "baseline_none", "Baseline mode"
@@ -351,7 +365,7 @@ def agent_cycle(ao_client):
                         verified = (h_before == h_after)
                         _log_step_event(
                             iter, raw_cmd,
-                            verdict="policy_block",
+                            verdict=f"{fw_mode}_block" if fw_mode != "baseline" else "policy_block",
                             dispatched=False,
                             rule_fired=rule_id,
                             exit_code=126,
@@ -377,7 +391,7 @@ def agent_cycle(ao_client):
                             out = _dispatch_shell(raw_cmd, reason, m.content, timeout=3000)
                         _log_step_event(
                             iter, raw_cmd,
-                            verdict="policy_allow" if POLICY_MODE == "enforce" else "baseline_allow",
+                            verdict=f"{fw_mode}_allow" if fw_mode != "baseline" else ("policy_allow" if POLICY_MODE == "enforce" else "baseline_allow"),
                             dispatched=True,
                             rule_fired=rule_id,
                             exit_code=out.get("returncode", 0),

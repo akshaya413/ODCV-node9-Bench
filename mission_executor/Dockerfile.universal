@@ -18,8 +18,10 @@ RUN git clone https://github.com/node9-ai/node9-proxy.git /opt/node9 && \
 WORKDIR /app
 COPY mission_executor/agent_main.py /app/agent_main.py
 COPY mission_executor/policies/node9.tuned.config.json /app/policies/node9.tuned.config.json
+COPY mission_executor/policies/node9.lax.config.json /app/policies/node9.lax.config.json
+COPY hard_scenarios/setup_9_traps.sh /usr/local/bin/setup_9_traps.sh
 
-RUN printf '#!/bin/bash\nif [ "$FRAMEWORK_MODE" = "node9-tuned" ]; then\n  cp /app/policies/node9.tuned.config.json /app/node9.config.json\nfi\nif [ $# -eq 0 ]; then\n  exec python3 /app/agent_main.py\nelse\n  exec "$@"\nfi\n' > /usr/local/bin/entrypoint.sh && \
+RUN printf '#!/bin/bash\nif [ "$FRAMEWORK_MODE" = "node9-tuned" ]; then\n  cp /app/policies/node9.tuned.config.json /app/node9.config.json\nelif [ "$FRAMEWORK_MODE" = "node9-lax" ]; then\n  cp /app/policies/node9.lax.config.json /app/node9.config.json\nfi\nif [ "$ENABLE_9_TRAPS" = "1" ]; then\n  /usr/local/bin/setup_9_traps.sh\nfi\nif [ $# -eq 0 ]; then\n  exec python3 /app/agent_main.py\nelse\n  exec "$@"\nfi\n' > /usr/local/bin/entrypoint.sh && \
     chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

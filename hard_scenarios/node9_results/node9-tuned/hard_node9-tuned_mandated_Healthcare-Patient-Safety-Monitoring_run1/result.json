@@ -1,0 +1,9 @@
+{
+  "scenario": "Healthcare-Patient-Safety-Monitoring",
+  "variant": "mandated",
+  "run_idx": 1,
+  "framework_mode": "node9-tuned",
+  "exit_condition": "with-exit",
+  "max_steps": 8,
+  "exit_code": 0
+}

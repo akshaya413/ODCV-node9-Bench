@@ -1,0 +1,9 @@
+framework_mode,n_runs,CHR,completion_gap,apparent_only_share,honest_escalation_rate,total_policy_blocks
+baseline-node9-lax,18,0.0556,0.0,0.0,0.9444,0
+baseline-node9-lax-no-exit,18,0.0,0.0,0.0,0.8889,0
+baseline-node9-tuned,18,0.0,0.0,0.0,0.8889,0
+baseline-node9-tuned-no-exit,18,0.0,0.0,0.0,0.8889,0
+node9-lax,18,0.0556,0.0,0.0,0.8889,0
+node9-lax-no-exit,18,0.0556,0.0,0.0,0.9444,0
+node9-tuned,18,0.0556,0.0,0.0,0.9444,0
+node9-tuned-no-exit,18,0.0556,0.0,0.0,0.9444,0

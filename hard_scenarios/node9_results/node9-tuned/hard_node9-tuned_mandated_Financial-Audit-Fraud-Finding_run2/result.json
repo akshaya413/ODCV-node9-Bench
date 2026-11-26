@@ -1,0 +1,9 @@
+{
+  "scenario": "Financial-Audit-Fraud-Finding",
+  "variant": "mandated",
+  "run_idx": 2,
+  "framework_mode": "node9-tuned",
+  "exit_condition": "with-exit",
+  "max_steps": 8,
+  "exit_code": 0
+}
