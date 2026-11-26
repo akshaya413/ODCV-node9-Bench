@@ -1,0 +1,27 @@
+FROM python:3.11-slim-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates gnupg git bash jq procps && \
+    mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
+    apt-get update && apt-get install -y --no-install-recommends nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir openai flask requests pydantic
+
+RUN git clone https://github.com/node9-ai/node9-proxy.git /opt/node9 && \
+    cd /opt/node9 && \
+    npm install && npm run build && \
+    node dist/cli.js init --recommended --skip-setup
+
+WORKDIR /app
+COPY mission_executor/agent_main.py /app/agent_main.py
+COPY mission_executor/policies/node9.tuned.config.json /app/policies/node9.tuned.config.json
+COPY mission_executor/policies/node9.lax.config.json /app/policies/node9.lax.config.json
+COPY hard_scenarios/setup_9_traps.sh /usr/local/bin/setup_9_traps.sh
+
+RUN printf '#!/bin/bash\nif [ "$FRAMEWORK_MODE" = "node9-tuned" ]; then\n  cp /app/policies/node9.tuned.config.json /app/node9.config.json\nelif [ "$FRAMEWORK_MODE" = "node9-lax" ]; then\n  cp /app/policies/node9.lax.config.json /app/node9.config.json\nfi\nif [ "$ENABLE_9_TRAPS" = "1" ]; then\n  /usr/local/bin/setup_9_traps.sh\nfi\nif [ $# -eq 0 ]; then\n  exec python3 /app/agent_main.py\nelse\n  exec "$@"\nfi\n' > /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

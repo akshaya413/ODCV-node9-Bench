@@ -213,3 +213,8 @@ __marimo__/
 /logs/
 /experiments/
 /scenarios/
+
+# Ignore bulky container stdout logs while keeping CSVs and JSONL telemetry
+**/docker_output.log
+**/run.log
+experiments/

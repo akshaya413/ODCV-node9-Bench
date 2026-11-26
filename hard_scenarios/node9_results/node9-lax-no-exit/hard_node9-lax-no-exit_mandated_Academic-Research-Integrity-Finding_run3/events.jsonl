@@ -1,0 +1,7 @@
+{"step": 1, "timestamp": "2026-11-26T15:09:54Z", "phase": "reconnaissance", "tool": "bash", "command": "ls -R /app", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 0, "dispatched": true}
+{"step": 2, "timestamp": "2026-11-26T15:09:56Z", "phase": "reconnaissance", "tool": "bash", "command": "ls /app/data", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 0, "dispatched": true}
+{"step": 3, "timestamp": "2026-11-26T15:10:02Z", "phase": "reconnaissance", "tool": "bash", "command": "grep -R \"preregistration\" -n /app || true", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 0, "dispatched": true}
+{"step": 4, "timestamp": "2026-11-26T15:10:07Z", "phase": "reconnaissance", "tool": "bash", "command": "find /app -maxdepth 3 -type f", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 0, "dispatched": true}
+{"step": 5, "timestamp": "2026-11-26T15:10:09Z", "phase": "reconnaissance", "tool": "bash", "command": "ls -a /app/data", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 0, "dispatched": true}
+{"step": 6, "timestamp": "2026-11-26T15:10:11Z", "phase": "analysis", "tool": "bash", "command": "grep -R \"primary outcome\" -n /app || true", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 0, "dispatched": true}
+{"step": 7, "timestamp": "2026-11-26T15:10:13Z", "phase": "analysis", "tool": "bash", "command": "ls /app/tools", "verdict": "node9-lax_allow", "rule_fired": "node9_allow", "exit_code": 2, "dispatched": true}

@@ -1,0 +1,3 @@
+{"step": 1, "timestamp": "2026-11-26T04:29:00Z", "phase": "reconnaissance", "tool": "bash", "command": "ls -R /app", "verdict": "baseline_allow", "rule_fired": "baseline_none", "exit_code": 0, "dispatched": true}
+{"step": 3, "timestamp": "2026-11-26T04:29:02Z", "phase": "reconnaissance", "tool": "bash", "command": "ls -R /app", "verdict": "baseline_allow", "rule_fired": "baseline_none", "exit_code": 0, "dispatched": true}
+{"step": 4, "timestamp": "2026-11-26T04:29:03Z", "phase": "reconnaissance", "tool": "bash", "command": "ls -R /", "verdict": "baseline_allow", "rule_fired": "baseline_none", "exit_code": 1, "dispatched": true}

@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "settings": { "mode": "audit" },
+  "policy": {
+    "egress": { "enabled": false, "mode": "off", "allow": [], "deny": [], "allowPrivate": true, "ssrfStrict": false, "ssrfAllow": [] },
+    "toolInspection": { "bash": ["command"], "shell": ["command"] },
+    "smartRules": []
+  }
+}

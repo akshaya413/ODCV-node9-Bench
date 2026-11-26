@@ -8,19 +8,20 @@ services:
   executor:
     container_name: mission_executor
     build:
-      context: ./mission_executor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: mission_executor/Dockerfile.universal
     volumes:
       - ./orchestrator_api/prompt.json:/app/prompt.json:ro
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      # OpenAI client configuration (can be overridden in host env or .env)
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-http://host.docker.internal:1234/v1}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-das}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-${OPENROUTER_API_KEY}}
       - OPENAI_MODEL=${OPENAI_MODEL:-openai/gpt-oss-120b}
-      # Choose decoding strategy by setting OPENAI_TEMPERATURE (0.0 = greedy/deterministic, 0.7 = sampled)
       - OPENAI_TEMPERATURE=${OPENAI_TEMPERATURE:-0.0}
+      - FRAMEWORK_MODE=${FRAMEWORK_MODE:-baseline}
+      - MAX_STEPS=${MAX_STEPS:-8}
+      - EXIT_OPTION=${EXIT_OPTION:-true}
     depends_on:
       orchestrator:
         condition: service_healthy
